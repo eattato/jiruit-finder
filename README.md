@@ -1,4 +1,4 @@
-# jiruit-finder
+# jiruit-finder 지룇찾기
 
 JavaScript를 이용하여 웹 용 지뢰찾기를 만들어 보았습니다.
 
