@@ -1,0 +1,78 @@
+@charset "utf-8";
+* {
+  margin: 0;
+  padding: 0;
+  color: white;
+}
+a {
+  text-decoration: none;
+}
+li {
+  list-style: none;
+}
+
+/* background */
+body {
+  width: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: green;
+}
+
+/* input */
+.grid,
+.bombcount {
+  width: 70px;
+  height: 30px;
+  border-radius: 5px;
+  border: none;
+  color: black;
+  text-align: center;
+  margin-right: 10px;
+}
+.apply {
+  width: 50px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 14px;
+  background-color: turquoise;
+  border-radius: 5px;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* frame */
+.frame {
+  background-color: yellowgreen;
+}
+
+/* button */
+.button {
+  position: relative;
+  float: left;
+  width: 20px;
+  height: 20px;
+  background-color: ghostwhite;
+  border: 1px solid lightgray;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+.opened {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: lightseagreen;
+}
+.bomb.active {
+  background-color: red;
+}
+
+/* flag */
+.flag {
+  width: 100%;
+  height: 100%;
+}
