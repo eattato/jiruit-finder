@@ -70,6 +70,9 @@ body {
 .bomb.active {
   background-color: red;
 }
+.button.wrap {
+  background-color: blue;
+}
 
 /* flag */
 .flag {
