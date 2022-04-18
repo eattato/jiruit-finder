@@ -136,7 +136,6 @@ $(document).ready(function () {
                         col < boxSize &&
                         col >= 0
                       ) {
-                        // console.log(col, row);
                         bombPlaces.splice(bombPlaces.indexOf(safePos), 1);
                         safeLength -= 1;
                         $(".button").eq(safePos).addClass("wrap");
