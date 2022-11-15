@@ -335,3 +335,51 @@ $(document).ready(function () {
     });
   });
 });
+
+$().ready(() => {
+  let boxSize = 10;
+  let bombCount = 20;
+  let boxes = [];
+
+  // col, row 값으로 박스 리턴해주는 함수
+  const getBox = (col, row) => {
+    return boxes[row * boxSize + col];
+  };
+
+  // 입력 시 숫자 아닌 값 들어가면 다시 되돌려 버림
+  $("input").each((ind, obj) => {
+    let input = $(obj);
+    let oldValue = input.val();
+    input.change(() => {
+      let newValue = input.val();
+      if (isNaN(newValue)) {
+        input.val(oldValue);
+      }
+    });
+  });
+
+  // 적용 버튼 클릭
+  $(".apply").click(() => {
+    // 초기화
+    boxes = [];
+    boxSize = Number($(".grid").val());
+    bombCount = Number($(".bombcount").val());
+
+    // 상자 생성
+    for (let col = 1; col <= boxSize; col++) {
+      for (let row = 1; row <= boxSize; row++) {
+        let htmlBox =
+          '<div class="button" style="width: ?%; height: ?%;"></div>'.format(
+            (1 / boxSize) * 100
+          );
+        let box = $($.parseHTML(htmlBox)); // $()로 감싸서 바닐라 element에서 jquery element로 변경
+        let boxData = {
+          box: box,
+          col: col,
+          row: row,
+        };
+        boxes.append(boxData);
+      }
+    }
+  });
+});
