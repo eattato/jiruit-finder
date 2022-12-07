@@ -60,12 +60,12 @@ body {
   cursor: pointer;
 }
 .opened {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+  color: white;
+  line-height: 200%;
+  text-align: center;
   background-color: lightseagreen;
 }
-.bomb.active {
+.bomb {
   background-color: red;
 }
 .button.wrap {
