@@ -1,7 +1,7 @@
 String.prototype.format = function () {
   var result = this;
   for (var ind in arguments) {
-    result = result.replace("?", arguments[ind]);
+    result = result.replaceAll("?", arguments[ind]);
   }
   return result;
 };
@@ -359,7 +359,8 @@ $().ready(() => {
 
   // 좌표로 박스 데이터 가져오는 함수
   const getBoxWithLoc = (col, row) => {
-    for (let box in boxes) {
+    for (let ind in boxes) {
+      let box = boxes[ind];
       if (box["col"] == col && box["row"] == row) {
         return box;
       }
@@ -368,44 +369,47 @@ $().ready(() => {
 
   // 박스 버튼으로 데이터 가져오는 함수
   const getBoxWithButton = (button) => {
-    for (let box in boxes) {
-      if (box["box"] == button) {
+    for (let ind in boxes) {
+      let box = boxes[ind];
+      if (box["box"].attr("id") == button.attr("id")) {
         return box;
       }
     }
   };
 
-  // 상자 개방
-  const openBox = (box) => {
-    let bombFound = 0;
-    box.opened = true;
-
-    // 근처의 폭탄 검색
+  // 8칸 폭탄 탐지
+  const searchBomb = (box, callback) => {
+    bombFound = 0;
     for (let col = box["col"] - 1; col <= box["col"] + 1; col++) {
-      for (let row = box["row"] - 1; col <= box["row"] + 1; col++) {
+      for (let row = box["row"] - 1; row <= box["row"] + 1; row++) {
         let searching = getBoxWithLoc(col, row);
-        if (searching["opened"] == false) {
+        if (searching != null && searching["opened"] == false) {
           if (searching["bomb"] == true) {
             bombFound += 1;
+          } else if (callback != null) {
+            callback(searching);
           }
         }
       }
     }
+    return bombFound;
+  };
+
+  // 상자 개방
+  const openBox = (box) => {
+    let bombFound = 0;
+    box["opened"] = true;
+
+    // 근처의 폭탄 검색
+    bombFound = searchBomb(box);
     box["box"].addClass("opened");
     box["box"].text(bombFound);
 
     // 폭탄 안 찍히면 근처 수색
     if (bombFound == 0) {
-      for (let col = box["col"] - 1; col <= box["col"] + 1; col++) {
-        for (let row = box["row"] - 1; col <= box["row"] + 1; col++) {
-          let searching = getBoxWithLoc(col, row);
-          if (searching["opened"] == false) {
-            if (searching["bomb"] == false) {
-              openBox(searching);
-            }
-          }
-        }
-      }
+      searchBomb(box, (box) => {
+        openBox(box);
+      });
     }
   };
 
@@ -438,7 +442,7 @@ $().ready(() => {
     boxSize = Number($(".grid").val());
     bombCount = Number($(".bombcount").val());
     let firstOpen = true;
-    let safeZoneSize = floor(boxSize / 6);
+    let safeZoneSize = Math.floor(boxSize / 6);
 
     // 상자 생성
     for (let col = 0; col < boxSize; col++) {
@@ -447,118 +451,121 @@ $().ready(() => {
           '<div class="button" style="width: ?%; height: ?%;"></div>'.format(
             (1 / boxSize) * 100
           );
-        let box = $($.parseHTML(htmlBox)); // $()로 감싸서 바닐라 element에서 jquery element로 변경
+
+        let btn = $($.parseHTML(htmlBox)); // $()로 감싸서 바닐라 element에서 jquery element로 변경
+        btn.attr("id", "button?".format((col + 1) * (row + 1)));
+
         let boxData = {
-          box: box,
+          box: btn,
           col: col,
           row: row,
           opened: false,
           flag: false,
           bomb: false,
         };
-        boxes.append(boxData);
+        boxes.push(boxData);
+        $(".frame").append(btn);
+
+        btn.mousedown(function (direc) {
+          let box = boxData;
+
+          // 처음 연 상자면 폭탄 및 세이프존 생성
+          if (firstOpen == true) {
+            firstOpen = false;
+
+            // 세이프존 제외
+            let bombTargets = [];
+            for (let col = 0; col < boxSize; col++) {
+              for (let row = 0; row < boxSize; row++) {
+                // 세이프존으로 지정되지 않았다면 폭탄 대상이 될 수 있음
+                if (
+                  (col < box["col"] - safeZoneSize ||
+                    col > box["col"] + safeZoneSize) &&
+                  (row < box["row"] - safeZoneSize ||
+                    row > box["row"] + safeZoneSize)
+                ) {
+                  bombTargets.push([col, row]);
+                }
+              }
+            }
+
+            // 폭탄 생성
+            for (let i = 1; i <= bombCount; i++) {
+              if (bombTargets.length < 1) {
+                break;
+              }
+              let bombInd = rand(0, bombTargets.length - 1);
+              let bombLoc = bombTargets[bombInd];
+              let box = getBoxWithLoc(bombLoc[0], bombLoc[1]);
+              box["bomb"] = true;
+              box["box"].addClass("bomb");
+              bombTargets.splice(bombInd, 1);
+            }
+
+            // 타이머 진행
+            resetTimer();
+            var timer = 0;
+            timerCounter = setInterval(function () {
+              timer += 1;
+              $(".timer").text(timer);
+            }, 1000);
+          }
+
+          // 열기
+          if (direc.which == 1) {
+            if (box["flag"] == false) {
+              // 상자 개방
+              if (box["bomb"] == false) {
+                openBox(box);
+              }
+
+              // 게임 오버
+              else {
+                for (let ind in boxes) {
+                  let box = boxes[ind];
+                  if (box["bomb"] == true) {
+                    box["box"].addClass("bomb");
+                  }
+                }
+                stopTimer();
+              }
+            }
+          }
+
+          // 깃발 설치 & 제거
+          else {
+            // 깃발 설치
+            if (box["flag"] == false) {
+              box["flag"] == true;
+              btn.append("<img class='flag' src='images/flag.png' alt='Flag'>");
+
+              let left = 0;
+              for (let ind in boxes) {
+                let box = boxes[ind];
+                if (box["bomb"] == false) {
+                  if (box["open"] == false) {
+                    left += 1;
+                  }
+                } else {
+                  if (box["flag"] == false) {
+                    left += 1;
+                  }
+                }
+              }
+              if (left == 0) {
+                stopTimer();
+                alert("클리어!");
+              }
+            }
+
+            // 깃발 제거
+            else {
+              box["flag"] == false;
+              btn.find(".flag").remove();
+            }
+          }
+        });
       }
     }
-
-    // 상자 클릭
-    $(".button").mousedown(function (direc) {
-      let btn = $(this);
-      let box = getBoxWithButton(btn);
-
-      // 처음 연 상자면 폭탄 및 세이프존 생성
-      if (firstOpen == true) {
-        firstOpen = false;
-
-        // 세이프존 제외
-        let bombTargets = [];
-        for (let col = 1; col <= boxSize; col++) {
-          for (let row = 1; row <= boxSize; row++) {
-            // 세이프존으로 지정되지 않았다면 폭탄 대상이 될 수 있음
-            if (
-              col < box["col"] - safeZoneSize &&
-              col > box["col"] + safeZoneSize &&
-              row < box["row"] - safeZoneSize &&
-              row > box["row"] + safeZoneSize
-            ) {
-              bombTargets.push([col, row]);
-            }
-          }
-        }
-
-        // 폭탄 생성
-        for (let i = 1; i <= bombCount; i++) {
-          if (bombTargets.length < 1) {
-            break;
-          }
-          let bombInd = rand(0, bombTargets.length - 1);
-          let bombLoc = bombTargets[bombInd];
-          let box = getBoxWithLoc(bombLoc[0], bombLoc[1]);
-          box["bomb"] = true;
-          boxes.splice(bombInd, 1);
-        }
-
-        // 타이머 진행
-        resetTimer();
-        var timer = 0;
-        timerCounter = setInterval(function () {
-          timer += 1;
-          $(".timer").text(timer);
-        }, 1000);
-      }
-
-      // 열기
-      if (direc.which == 1) {
-        if (box["flag"] == false) {
-          // 상자 개방
-          if (box["bomb"] == false) {
-            openBox(box);
-          }
-
-          // 게임 오버
-          else {
-            for (let ind in boxes) {
-              let box = boxes[ind];
-              if (box["bomb"] == true) {
-                box["box"].addClass("bomb");
-              }
-            }
-            stopTimer();
-          }
-        }
-      }
-
-      // 깃발 설치 & 제거
-      else {
-        // 깃발 설치
-        if (box["flag"] == false) {
-          box["flag"] == true;
-          btn.append("<img class='flag' src='images/flag.png' alt='Flag'>");
-
-          let left = 0;
-          for (let ind in boxes) {
-            let box = boxes[ind];
-            if (box["bomb"] == false) {
-              if (box["open"] == false) {
-                left += 1;
-              }
-            } else {
-              if (box["flag"] == false) {
-                left += 1;
-              }
-            }
-          }
-          if (left == 0) {
-            stopTimer();
-            alert("클리어!");
-          }
-        }
-
-        // 깃발 제거
-        else {
-          box["flag"] == false;
-          btn.find(".flag").remove();
-        }
-      }
-    });
   });
 });
