@@ -403,7 +403,9 @@ $().ready(() => {
     // 근처의 폭탄 검색
     bombFound = searchBomb(box);
     box["box"].addClass("opened");
-    box["box"].text(bombFound);
+    if (bombFound != 0) {
+      box["box"].text(bombFound);
+    }
 
     // 폭탄 안 찍히면 근처 수색
     if (bombFound == 0) {
