@@ -2,7 +2,7 @@
 * {
   margin: 0;
   padding: 0;
-  color: white;
+  color: black;
 }
 a {
   text-decoration: none;
@@ -17,10 +17,19 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: green;
+  background-color: lightgreen;
+  padding-top: 30px;
 }
 
 /* input */
+.input_frame {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 150px;
+  height: 30px;
+  margin: 5px 0;
+}
 .grid,
 .bombcount {
   width: 70px;
@@ -32,15 +41,18 @@ body {
   margin-right: 10px;
 }
 .apply {
-  width: 50px;
+  width: 60px;
   height: 30px;
   line-height: 30px;
   font-size: 14px;
   background-color: turquoise;
+  color: white;
   border-radius: 5px;
   border: none;
   text-align: center;
   cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 30px;
 }
 
 /* frame */
@@ -65,15 +77,14 @@ body {
   text-align: center;
   background-color: lightseagreen;
 }
-.bomb {
-  background-color: red;
-}
-.button.wrap {
-  background-color: blue;
-}
 
 /* flag */
 .flag {
   width: 100%;
   height: 100%;
+}
+
+.hitmarker,
+.explosion {
+  width: 100%;
 }
