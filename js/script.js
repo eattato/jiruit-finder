@@ -249,9 +249,9 @@ $().ready(() => {
               resetTimer();
               var timer = 0;
               timerCounter = setInterval(function () {
-                timer += 1;
+                timer += 0.01;
                 $(".timer").text(timer);
-              }, 1000);
+              }, 10);
             }
 
             // 열기
