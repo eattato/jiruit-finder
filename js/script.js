@@ -250,7 +250,7 @@ $().ready(() => {
               var timer = 0;
               timerCounter = setInterval(function () {
                 timer += 0.01;
-                $(".timer").text(timer);
+                $(".timer").text(timer.toFixed(2));
               }, 10);
             }
 
